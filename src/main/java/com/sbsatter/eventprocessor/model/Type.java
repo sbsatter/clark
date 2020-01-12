@@ -1,5 +1,5 @@
 package com.sbsatter.eventprocessor.model;
 
 public enum Type {
-    CUSTOMER_REGISTERED, PRODUCT_ORDERED, ORDER_CANCELLED, ORDER_ACCEPTED, ORDER_FULFILLED, ORDER_DECLINED;
+    customer_registered, product_ordered, order_cancelled, order_accepted, order_fulfilled, order_declined;
 }

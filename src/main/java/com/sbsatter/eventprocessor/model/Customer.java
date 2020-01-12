@@ -1,23 +1,34 @@
 package com.sbsatter.eventprocessor.model;
 
+import lombok.Data;
+
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
+@Data
 public class Customer extends BaseModel {
     @Id
-    @Column(nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private String aggregateId;
+    private String eventId;
 
     private String name;
 
-    @Temporal(TemporalType.DATE)
-    private LocalDate birthDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date birthDate;
 
-    @Temporal(TemporalType.DATE)
-    private Date timestamp;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
 
+    public Customer fromEvent(Event event) {
+        aggregateId = event.getAggregateId();
+        eventId = event.getId();
+        createdAt = event.getTimestamp();
+        name = event.getData().getName();
+        birthDate = event.getData().getBirthdate();
+        return this;
+    }
 }
