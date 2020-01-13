@@ -4,43 +4,43 @@ package com.sbsatter.eventprocessor.config;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.sbsatter.eventprocessor.model.BaseModel;
+import com.sbsatter.eventprocessor.model.CompositeModel;
 import com.sbsatter.eventprocessor.model.Event;
+import com.sbsatter.eventprocessor.service.CompositeModelService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.adapter.PropertyExtractingDelegatingItemWriter;
 import org.springframework.batch.item.json.GsonJsonObjectReader;
 import org.springframework.batch.item.json.JsonItemReader;
 import org.springframework.batch.item.json.builder.JsonItemReaderBuilder;
-import org.springframework.batch.item.support.ClassifierCompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.classify.Classifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
-
-import javax.persistence.EntityManagerFactory;
 
 @Configuration
 @EnableBatchProcessing
 public class BatchConfiguration {
 
-
+    private final EventToCompositeProcessor processor;
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
+    private final CompositeModelService compositeModelService;
+
+    @Value("${args-to-use}")
+    private String [] argsToUse;
 
     @Autowired
-    private Classifier<Event, ItemWriter<? super BaseModel>> customClassifier;
-
-    @Autowired
-    public BatchConfiguration(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
+    public BatchConfiguration(EventToCompositeProcessor processor, JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, CompositeModelService compositeModelService) {
+        this.processor = processor;
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
+        this.compositeModelService = compositeModelService;
     }
 
     @Bean
@@ -53,7 +53,7 @@ public class BatchConfiguration {
         gsonMapper.setMapper(gson);
         return new JsonItemReaderBuilder<Event>()
                 .jsonObjectReader(gsonMapper)
-                .resource(new FileSystemResource("events-line.json"))
+                .resource(new FileSystemResource("events.json"))
                 .name("eventsJsonItemReader")
                 .build();
     }
@@ -67,19 +67,22 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public Step step1(JpaItemWriter<Object> writer, JsonItemReader<Event> jsonItemReader) {
+    public Step step(PropertyExtractingDelegatingItemWriter<CompositeModel> writer, JsonItemReader<Event> jsonItemReader) {
         return stepBuilderFactory.get("execute-1")
-                .<Event,Object>chunk(100)
+                .<Event, CompositeModel>chunk(100)
                 .reader(jsonItemReader)
-//                .processor(new EventToObjectMappingProcessor())
+                .processor(processor)
                 .writer(writer)
                 .build();
     }
 
     @Bean
-    public ClassifierCompositeItemWriter<BaseModel> classifierCustomerCompositeItemWriter() throws Exception {
-        ClassifierCompositeItemWriter<BaseModel> compositeItemWriter = new ClassifierCompositeItemWriter<>();
-        compositeItemWriter.setClassifier(customClassifier);
-        return compositeItemWriter;
+    public PropertyExtractingDelegatingItemWriter<CompositeModel> propertyExtractingDelegatingItemWriter() {
+        PropertyExtractingDelegatingItemWriter<CompositeModel> writer = new PropertyExtractingDelegatingItemWriter<>();
+        writer.setFieldsUsedAsTargetMethodArguments(argsToUse);
+        writer.setTargetObject(compositeModelService);
+        writer.setTargetMethod("decide");
+        return writer;
     }
+
 }
