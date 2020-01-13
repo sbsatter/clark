@@ -1,14 +1,13 @@
 package com.sbsatter.eventprocessor.model;
 
 import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Data
-public class ProductOrder  extends BaseModel {
+public class ProductOrder {
     @Id
 //    @Column(nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

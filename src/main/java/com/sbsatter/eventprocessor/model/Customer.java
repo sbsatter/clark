@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Entity
 @Data
-public class Customer extends BaseModel {
+public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
