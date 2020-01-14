@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProductOrderRepository extends CrudRepository<ProductOrder, Integer> {
+    ProductOrder findByAggregateId(String aggregateId);
 }

@@ -9,8 +9,8 @@ import java.util.Date;
 @Data
 public class Customer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Integer id;
     private String aggregateId;
     private String eventId;
 

@@ -2,16 +2,22 @@ package com.sbsatter.eventprocessor.config;
 
 import com.sbsatter.eventprocessor.model.*;
 import com.sbsatter.eventprocessor.repository.CustomerRepository;
+import com.sbsatter.eventprocessor.repository.ProductOrderRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Slf4j
 public class EventToCompositeProcessor implements ItemProcessor<Event, CompositeModel> {
 
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
+    private final ProductOrderRepository productOrderRepository;
 
-    public EventToCompositeProcessor(CustomerRepository customerRepository) {
+    public EventToCompositeProcessor(CustomerRepository customerRepository, ProductOrderRepository productOrderRepository) {
         this.customerRepository = customerRepository;
+        this.productOrderRepository = productOrderRepository;
     }
 
     /**
@@ -26,22 +32,37 @@ public class EventToCompositeProcessor implements ItemProcessor<Event, Composite
      */
     @Override
     public CompositeModel process(Event item) throws Exception {
+//        Thread.sleep(50);
+        log.info("*********************************{}*************************************", item.getType());
+        log.info("id: {} | timestamp: {}", item.getId(), item.getTimestamp());
+        log.info("aggregate id: {}, payload: {}", item.getAggregateId(), item.getData());
+        ProductOrder order;
         CompositeModel compositeModel = new CompositeModel();
         if (item.getType() == Type.customer_registered) {
-//            compositeModel.setIsCustomer(Boolean.TRUE);
             compositeModel.setCustomer(new Customer().fromEvent(item));
+            log.info("Customer: {}", compositeModel.getCustomer());
             return compositeModel;
         }
-        ProductOrder order = new ProductOrder();
-        order.setAggregateId(item.getAggregateId());
-        order.setEventId(item.getAggregateId());
-        order.setType(item.getType());
-        order.setOrderedAt(item.getTimestamp());
+
         if (item.getType() == Type.product_ordered) {
-            Customer customer = customerRepository.findByEventId(item.getId());
+            Customer customer = customerRepository.findByAggregateId(item.getData().getCustomerId());
+            if (customer == null) {
+                log.info("Previous data may not have been saved for customer {}", item.getData().getCustomerId());
+                customer = new Customer();
+                customer.setAggregateId(item.getAggregateId());
+            }
+            log.info("Product bought by customer >> {}", customer);
+            order = new ProductOrder();
             order.setName(item.getData().getName());
             order.setCustomer(customer);
-        } else if (item.getType() == Type.order_accepted) {
+            order.setOrderedAt(item.getTimestamp());
+            order.setAggregateId(item.getAggregateId());
+            order.setEventId(item.getAggregateId());
+        } else {
+            order = productOrderRepository.findByAggregateId(item.getAggregateId());
+            log.info("Order retrieved: {}", order);
+        }
+        if (item.getType() == Type.order_accepted) {
             order.setOrderAcceptedAt(item.getTimestamp());
         } else if (item.getType() == Type.order_cancelled) {
             order.setOrderCancelledAt(item.getTimestamp());
@@ -50,6 +71,8 @@ public class EventToCompositeProcessor implements ItemProcessor<Event, Composite
         } else if (item.getType() == Type.order_fulfilled) {
             order.setOrderFulfilledAt(item.getTimestamp());
         }
+
+        order.setType(item.getType());
         compositeModel.setProductOrder(order);
         return compositeModel;
     }

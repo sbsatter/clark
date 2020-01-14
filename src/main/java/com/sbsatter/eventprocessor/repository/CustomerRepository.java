@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CustomerRepository extends CrudRepository<Customer, Integer> {
-    Customer findByEventId(String id);
+    Customer findByAggregateId(String id);
 }

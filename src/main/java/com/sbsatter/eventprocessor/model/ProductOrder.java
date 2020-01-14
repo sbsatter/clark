@@ -10,8 +10,8 @@ import java.util.Date;
 public class ProductOrder {
     @Id
 //    @Column(nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Integer id;
     private String aggregateId;
     private String eventId;
     // item name

@@ -4,9 +4,11 @@ import com.sbsatter.eventprocessor.model.Customer;
 import com.sbsatter.eventprocessor.model.ProductOrder;
 import com.sbsatter.eventprocessor.repository.CustomerRepository;
 import com.sbsatter.eventprocessor.repository.ProductOrderRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class CompositeModelService {
 
     private final CustomerRepository customerRepository;
@@ -19,9 +21,11 @@ public class CompositeModelService {
 
     public void decide(Customer customer, ProductOrder order) {
         if (customer != null) {
-            customerRepository.save(customer);
+            customer = customerRepository.save(customer);
+            log.info("Customer saved >> {}", customer);
         } else {
             productOrderRepository.save(order);
+            log.info("Product Order saved >> {}", order);
         }
     }
 
