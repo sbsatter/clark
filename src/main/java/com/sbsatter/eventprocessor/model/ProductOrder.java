@@ -31,4 +31,6 @@ public class ProductOrder {
     private Date orderDeclinedAt;
     @Temporal(TemporalType.TIMESTAMP)
     private Date orderFulfilledAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdatedAt;
 }

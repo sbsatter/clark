@@ -6,7 +6,6 @@ import com.sbsatter.eventprocessor.repository.ProductOrderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Slf4j
@@ -72,6 +71,7 @@ public class EventToCompositeProcessor implements ItemProcessor<Event, Composite
             order.setOrderFulfilledAt(item.getTimestamp());
         }
 
+        order.setLastUpdatedAt(item.getTimestamp());
         order.setType(item.getType());
         compositeModel.setProductOrder(order);
         return compositeModel;
