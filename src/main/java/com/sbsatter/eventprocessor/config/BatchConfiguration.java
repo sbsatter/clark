@@ -53,7 +53,7 @@ public class BatchConfiguration {
         gsonMapper.setMapper(gson);
         return new JsonItemReaderBuilder<Event>()
                 .jsonObjectReader(gsonMapper)
-                .resource(new FileSystemResource("events.json"))
+                .resource(new FileSystemResource("events-single.json"))
                 .name("eventsJsonItemReader")
                 .build();
     }
