@@ -6,5 +6,4 @@ SELECT count(*)  from ProductOrder where orderedAt <= @time and lastUpdatedAt > 
 select floor(datediff(p.orderedAt, c.birthDate)/365) as age, (count(c.name) * 100)/(select count(*) from ProductOrder p1 where p1.type='order_cancelled') ratio from ProductOrder p
 inner join Customer c on c.aggregateId = p.customer_aggregateId
 where type = 'order_cancelled'
-group by age order by age asc
-;
+group by age order by age asc;
