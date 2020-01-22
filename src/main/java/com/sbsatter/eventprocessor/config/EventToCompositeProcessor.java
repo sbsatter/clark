@@ -31,15 +31,18 @@ public class EventToCompositeProcessor implements ItemProcessor<Event, Composite
      */
     @Override
     public CompositeModel process(Event item) throws Exception {
-//        Thread.sleep(50);
         log.info("*********************************{}*************************************", item.getType());
         log.info("id: {} | timestamp: {}", item.getId(), item.getTimestamp());
         log.info("aggregate id: {}, payload: {}", item.getAggregateId(), item.getData());
         ProductOrder order;
         CompositeModel compositeModel = new CompositeModel();
         if (item.getType() == Type.customer_registered) {
-            compositeModel.setCustomer(new Customer().fromEvent(item));
-            log.info("Customer: {}", compositeModel.getCustomer());
+        	Customer customer = customerRepository.findByAggregateId(item.getAggregateId());
+	        if (customer == null) {
+	        	customer = new Customer().fromEvent(item);
+	        }
+	        compositeModel.setCustomer(customer);
+	        log.info("Customer: {}", compositeModel.getCustomer());
             return compositeModel;
         }
 
@@ -49,6 +52,7 @@ public class EventToCompositeProcessor implements ItemProcessor<Event, Composite
                 log.info("Previous data may not have been saved for customer {}", item.getData().getCustomerId());
                 customer = new Customer();
                 customer.setAggregateId(item.getAggregateId());
+                compositeModel.setCustomer(customer);
             }
             log.info("Product bought by customer >> {}", customer);
             order = new ProductOrder();

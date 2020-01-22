@@ -23,7 +23,8 @@ public class CompositeModelService {
         if (customer != null) {
             customer = customerRepository.save(customer);
             log.info("Customer saved >> {}", customer);
-        } else {
+        }
+        if (order != null){
             productOrderRepository.save(order);
             log.info("Product Order saved >> {}", order);
         }

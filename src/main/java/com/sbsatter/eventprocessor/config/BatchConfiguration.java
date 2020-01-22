@@ -69,7 +69,7 @@ public class BatchConfiguration {
     @Bean
     public Step step(PropertyExtractingDelegatingItemWriter<CompositeModel> writer, JsonItemReader<Event> jsonItemReader) {
         return stepBuilderFactory.get("execute-1")
-                .<Event, CompositeModel>chunk(1)
+                .<Event, CompositeModel>chunk(100)
                 .reader(jsonItemReader)
                 .processor(processor)
                 .writer(writer)
