@@ -16,8 +16,8 @@ public class ProductOrder {
     private String eventId;
     // item name
     private String name;
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    private Customer customer;
+//    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    private String customerAggregateId;
 //    private Customer customer;
     @Enumerated(EnumType.STRING)
     private Type type;
@@ -33,4 +33,7 @@ public class ProductOrder {
     private Date orderFulfilledAt;
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdatedAt;
+    @Version
+    private long version;
+
 }
