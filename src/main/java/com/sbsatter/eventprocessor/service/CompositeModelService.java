@@ -31,6 +31,7 @@ public class CompositeModelService {
             ProductOrder savedOrder = productOrderRepository.findByAggregateId(order.getAggregateId()).orElse(new ProductOrder());
             Date timestamp = order.getLastUpdatedAt();
             if (savedOrder.getLastUpdatedAt() != null && savedOrder.getLastUpdatedAt().before(timestamp)) {
+            	savedOrder.setType(order.getType());
                 savedOrder.setLastUpdatedAt(timestamp);
             }
             if (order.getType() == Type.product_ordered) {
