@@ -34,7 +34,7 @@ public class EventToCompositeProcessor implements ItemProcessor<Event, Composite
         log.info("*********************************{}*************************************", item.getType());
         log.info("id: {} | timestamp: {}", item.getId(), item.getTimestamp());
         log.info("aggregate id: {}, payload: {}", item.getAggregateId(), item.getData());
-        ProductOrder order;
+        ProductOrder order = new ProductOrder();
         CompositeModel compositeModel = new CompositeModel();
         if (item.getType() == Type.customer_registered) {
         	Customer customer = customerRepository.findByAggregateId(item.getAggregateId());
@@ -47,23 +47,25 @@ public class EventToCompositeProcessor implements ItemProcessor<Event, Composite
         }
 
         if (item.getType() == Type.product_ordered) {
-            Customer customer = customerRepository.findByAggregateId(item.getData().getCustomerId());
-            if (customer == null) {
-                log.info("Previous data may not have been saved for customer {}", item.getData().getCustomerId());
-                customer = new Customer();
-                customer.setAggregateId(item.getAggregateId());
-                compositeModel.setCustomer(customer);
-            }
-            log.info("Product bought by customer >> {}", customer);
-            order = new ProductOrder();
+
+//            Customer customer = customerRepository.findByAggregateId(item.getData().getCustomerId());
+//            if (customer == null) {
+//                log.info("Previous data may not have been saved for customer {}", item.getData().getCustomerId());
+//                customer = new Customer();
+//                customer.setAggregateId(item.getAggregateId());
+//            }
+//            log.info("Product bought by customer >> {}", customer);
+//            order = new ProductOrder();
+
             order.setName(item.getData().getName());
-            order.setCustomer(customer);
+            order.setCustomerAggregateId(item.getData().getCustomerId());
+//            order.setCustomer(customer);
             order.setOrderedAt(item.getTimestamp());
-            order.setAggregateId(item.getAggregateId());
             order.setEventId(item.getAggregateId());
         } else {
-            order = productOrderRepository.findByAggregateId(item.getAggregateId());
-            log.info("Order retrieved: {}", order);
+//            order = productOrderRepository.findByAggregateId(item.getAggregateId()).orElse(new ProductOrder());
+//            log.info("Order retrieved: {}", order);
+//            order.setAggregateId(item.getAggregateId());
         }
         if (item.getType() == Type.order_accepted) {
             order.setOrderAcceptedAt(item.getTimestamp());
@@ -75,6 +77,7 @@ public class EventToCompositeProcessor implements ItemProcessor<Event, Composite
             order.setOrderFulfilledAt(item.getTimestamp());
         }
 
+        order.setAggregateId(item.getAggregateId());
         order.setLastUpdatedAt(item.getTimestamp());
         order.setType(item.getType());
         compositeModel.setProductOrder(order);
