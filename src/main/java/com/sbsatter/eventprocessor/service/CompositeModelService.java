@@ -47,6 +47,7 @@ public class CompositeModelService {
             }
 
             productOrderRepository.save(savedOrder);
+
             log.info("Product Order saved >> {}", order);
         }
     }
