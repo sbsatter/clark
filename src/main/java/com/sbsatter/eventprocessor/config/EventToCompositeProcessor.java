@@ -53,7 +53,7 @@ public class EventToCompositeProcessor implements ItemProcessor<Event, Composite
 //            log.info("Product bought by customer >> {}", customer);
 //            order = new ProductOrder();
             order.setName(item.getData().getName());
-            order.setCustomerAggregateId(item.getAggregateId());
+            order.setCustomerAggregateId(item.getData().getCustomerId());
 //            order.setCustomer(customer);
             order.setOrderedAt(item.getTimestamp());
             order.setEventId(item.getAggregateId());
